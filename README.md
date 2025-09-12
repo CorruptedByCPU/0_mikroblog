@@ -8,15 +8,15 @@ Witaj na moim mikroblogu poświęconemu programowaniu. Celem wpisów będzie prz
 
 Wpisy będą oznaczane za pomocą taga **#blackdev.org**, pozwoli to na łatwe zlokalizowanie wszystkich wpisów mojego autorstwa. Nie omieszkam dodać innych, zależnie od poruszanego tematu.
 
-Nie jestem osobą postronną w tym temacie i nie sądzę bym rzucał sie z motyką na słońce. Posiadam odpowiednie zaplecze doświadczenia z tej dziedziny, co mogę udowodnić okazując moje dwa repozytoria już w jakimś stopniu działających systemów. Jedeno w języku Asemblera (<a href="https://github.com/CorruptedByCPU/Cyjon/tree/eldest">Cyjon v1</a>, <a href="https://github.com/CorruptedByCPU/Cyjon/tree/old">Cyjon v2</a>) oraz drugie zapisane w czystym języku C (<a href="https://github.com/CorruptedByCPU/Foton">Foton</a>)
+Nie jestem osobą postronną w tym temacie i nie sądzę bym rzucał się z motyką na słońce. Posiadam odpowiednie zaplecze doświadczenia z tej dziedziny, co mogę udowodnić okazując moje dwa repozytoria już w jakimś stopniu działających systemów. Jedno w języku Asemblera (<a href="https://github.com/CorruptedByCPU/Cyjon/tree/eldest">Cyjon v1</a>, <a href="https://github.com/CorruptedByCPU/Cyjon/tree/old">Cyjon v2</a>) oraz drugie zapisane w czystym języku C (<a href="https://github.com/CorruptedByCPU/Foton">Foton</a>)
 <sup>*no dobra, jest trochę wstawek z języka Asemblera, bez tego się nie obejdzie*</sup>
 
 Naszymi głównymi narzędziami programistycznymi będą języki **C** i **Asembler** — każdy w swoim zakresie odpowiedzialności. Do kompilacji kodu w języku C posłuży nam **Clang** z rodziny LLVM (https://clang.llvm.org/), natomiast pliki asemblerowe przetwarzane będą przez **NASM** (https://www.nasm.us/). Natomiast za środowisko produkcyjne posłuży nam jakikolwiek system operacyjny z rodziny GNU/Linux. Można też wszystkie akcje wykonać za pomocą MS Windows i subsystemu WSL (sprawdzałem, działa).
 
-Ostatnia informacja gwoli ścisłości, każdy z przykładów zostanie przedstawiony w sposób wymagający minimalnego podejścia do uzyskania oczekiwanego efektu/funkcjonalności. Kod rozwijać będziemy powoli, aby wszystko było dobrze zrozumiałe. Wszelkie uwagi, pytania, pomysły, domysły, spekulacje <sup>(i tak dalej)</sup> mogą zostać poddane przemyśleniom, ale niekoniecznie zaimplementowane.
+Ostatnia informacja gwoli ścisłości: każdy przykład zostanie przedstawiony w sposób minimalny, aby osiągnąć oczekiwany efekt. Funkcjonalność będziemy rozwijać powoli, krok po kroku, aby wszystko było dobrze zrozumiałe. Wszelkie uwagi, pytania, pomysły, domysły i spekulacje mogą zostać poddane przemyśleniom, ale niekoniecznie zaimplementowane.
 
 ## Jądro systemu operacyjnego
-Na początek osiągnijmy status Quo w środowisku wirtualnym (lub fizycznym) tworząc prosty szkielet pierwszej funkcji jądra systemu.
+Na początek osiągnijmy status quo w środowisku wirtualnym (lub fizycznym) tworząc prosty szkielet pierwszej funkcji jądra systemu.
 
 <sub>Plik: `kernel/init.c`</sub>
 ```c
@@ -25,7 +25,7 @@ void kernel_init( void ) {
 }
 ```
 
-Próba kompilacji powyższego kodu za pomocą domyślnego podejścia, nie przyniesie porządanego efektu.
+Próba kompilacji powyższego kodu za pomocą domyślnego podejścia, nie przyniesie pożądanego efektu.
 
 <sub>Przykład:</sub>
 ```sh
@@ -34,7 +34,7 @@ $ clang kernel/init.c
 (.text+0x1b): undefined reference to `main'
 ```
 
-Głównym powodem jest nasz system produkcyjny. Kompilator Clang (podobnie jak GCC) zakłada, że tworzymy zwykłą aplikację dla systemu operacyjnego, w którym aktualnie pracujemy. Musimy zatem przekazać kompilatorowi jasne instrukcje, że piszemy kod działający „samodzielnie”, bez nadzoru systemu operacyjnego.
+Dzieje się tak dlatego, że kompilator Clang (podobnie jak GCC) zakłada, iż tworzymy zwykłą aplikację użytkową dla istniejącego systemu operacyjnego (w którym aktualnie pracujemy). Musimy zatem przekazać kompilatorowi jasne instrukcje, że piszemy kod działający „samodzielnie”, bez nadzoru jakiegokolwiek systemu operacyjnego.
 
 <sub>Przykład:</sub>
 ```sh
@@ -55,54 +55,41 @@ W powyższym poleceniu informujemy kompilator o oczekiwanych właściwościach g
 
 ## Przestrzeń adresowa systemu operacyjnego.
 
-Zanim przejdziemy do analizy kodu źródłowego linkera (`tools/kernel.ld`), warto na chwilę przystanąć i zaznajomić się z przestrzenią pamięci w której będziemy pracować na codzień.
+Zanim przejdziemy do analizy kodu źródłowego linkera (`tools/kernel.ld`), warto na chwilę przystanąć i zaznajomić się z przestrzenią pamięci w której będziemy pracować na co dzień.
 
-Nie będziemy czytać/modyfikować zawartości przestrzeni pamięci fizycznej bezpośrednio. Nie jest to możliwe z punktu widzenia programisty. Za poruszanie się i wszelkie na niej opracje posłuży nam **wirtualna przestrzeń adresowa** (tzw. logiczna). Natomiast bezpośredni dostęp do pamięci fizycznej stanowi wyjątek i dostęp zezwolony jest tylko dla urządzeń oraz specjalnych sterowników, często w fazie inicjalizacji sprzętu.
+Nie będziemy czytać/modyfikować zawartości przestrzeni pamięci fizycznej bezpośrednio. Nie jest to możliwe z punktu widzenia programisty. Za poruszanie się i wszelkie na niej operacje posłuży nam **wirtualna przestrzeń adresowa** (tzw. logiczna). Natomiast bezpośredni dostęp do pamięci fizycznej stanowi wyjątek i dostęp zezwolony jest tylko dla urządzeń oraz specjalnych sterowników, często w fazie inicjalizacji sprzętu.
 
-W teorii rejestry ogólnego przeznaczenia w architektura x86-64 mają 64 bity, które pozwalają na zaadresowanie **16 EiB** (exbibajtów) przestrzeni pamięci wirtualnej. Choć rozmiar jest imponujący <sup>overkill</sup> to faktycznie tylko część jest wspierana przez procesory.
+Choć rejestry ogólnego przeznaczenia w architekturze x86-64 mają 64 bity, to pierwsze procesory x86-64 udostępniły jedynie 48 bitów adresowych. Daje nam to przestrzeń o rozmiarze 256 TiB...
 
-Pierwsze procesory x86-64 obsługiwały 48 bitów przestrzeni aresowej, z czasem dodano obsługę 56 bitów. natomiast nowsze (Intel Ice Lake, AMD EPYC/Threadripper) już 56 bitów (obsługa włączana na życzenie, domyślnie jest to 48 bitów).
+Pozostałe bity (63..48) muszą być kopią bitu 47, jest to tak zwana **kanoniczność adresów**. Dzięki temu przestrzeń wirtualna składa się z:
 
-Co z pozostałymi bitami 48..63? Pozostałe bity muszą być kopią bitu najwyższego używanego (sign-extend), czyli bitu nr N-1, gdzie N = liczba obsługiwanych bitów adresowych. Nazywamy to kanonicznością adresów w x86-64.
+- Dolna połowa **0x0000000000000000**...**0x00007FFFFFFFFFFF** - dla procesów i bibliotek użytkownika,
+- Górna połowa **0xFFFF800000000000...0xFFFFFFFFFFFFFFFF** - dla jądra systemu, modułów i sterowników.
 
-Przykład dla pierwszej generacji procesorów, jeśli bit nr 47 został ustawiony
+Między nimi pozostaje obszar niekanoniczny, jakakolwiek próba dostępu generuje wyjątek procesora.<sup>(General Protection Fault)</sup>
 
-```
-0x0000000000000000100000000000000000000000000000000000000000000000
-```
-
-![alt text](image-9.png)
-
-to każdy kolejny jest automatycznie powielony.
+Prosty przykład wizualizacji wirtualnej przestrzeni pamięci:
 
 ```
-0x1111111111111111100000000000000000000000000000000000000000000000
+0x0000000000000000
+|	0x00007FFFFFFFFFFF
++---+------------------------------------+---+
+| P |      przestrzeń niekanoniczna      | K |
++---+------------------------------------+---+
+						0xFFFF800000000000	 |
+							0xFFFFFFFFFFFFFFFF
+P - przestrzeń procesu
+K - przestrzeń jądra systemu
 ```
+lub w formie tabelki:
 
-![alt text](image-8.png)
-
-W efekcie powstają dwie części przestrzeni wirtualnej:
-
-	- początek:	0x0000000000000000 … 0x00007FFFFFFFFFFF
-	- koniec:	0xFFFF800000000000 … 0xFFFFFFFFFFFFFFFF
-
-Między nimi znajduje się przestrzeń z niekanonicznymi adresami.
-
-Uzbrajając się powyższą wiedzę możemy przystąpić do wizualizacji mapy pamięci naszego przyszłego systemu operacyjnego:
 |Rozmiar|Adresacja|Opis|
 |-|-|-|
 |128 TiB|0x0000000000000000 - 0x00007FFFFFFFFFFF|Przestrzeń użytkownika: programy, stos, biblioteki.|
-|<16 EiB|0x0000800000000000 - 0xFFFF7FFFFFFFFFFF|Zarezerwowana / niekanoniczna przestrzeń adresowa.|
+|~16 EiB|0x0000800000000000 - 0xFFFF7FFFFFFFFFFF|Zarezerwowana / niekanoniczna przestrzeń adresowa.|
 |128 TiB|0xFFFF800000000000 - 0xFFFFFFFFFFFFFFFF|Przestrzeń jądra: kernel, moduły, odwzorowanie pamięci fizycznej.|
 
-Jest to zaledwie ogólny zarys
-
-[tbc]
-
-
-
-
-
+Na stan dzisiejszy nie spotkałem się z serwerami o pojemności większej niż 6 TiB pamięci fizycznej RAM, a nadal jest to kropla w morzu przy możliwościach jakie daje nam **PML5** i 56-bitowa adresacja<sup>(o tym w następnych wpisach na mikroblogu)
 
 ## Linker
 
@@ -132,9 +119,9 @@ Plik ten zawiera minimalną konfigurację, nic zbędnego na nasze aktualne zapot
 - `OUTPUT_FORMAT( elf64-x86-64 )` typ pliku docelowego to 64-bitowy ELF dla architektury x86-64,
 - `ENTRY( kernel_init )` ustala punkt wejścia programu. To adres, pod który skoczy program rozruchowy po zakończeniu swojej pracy,
 - `0xFFFFFFFFFFFF0000` lokalizacja jądra systemu w przestrzeni wirtualnej,
-- `.all` wszystkie części/sekcje jądra będziemy trzymać razem ze sobą, w tym momencie jest to nam w zupełności wystarczające,
+- `.all` wszystkie części/sekcje jądra będziemy trzymać w jednej sekcji, w tym momencie jest to nam w zupełności wystarczające,
 
-Ostatnia pozycja `PHDRS` jest składową pliku ELF, zawiera informacje o właściwościach sekcji `.all` tj.
+Ostatnia pozycja **PHDRS** określa właściwości segmentów ELF, w tym przypadku naszej sekcji **.all** tj.
 
 - **(1 << 0 )** sekcja zawiera kod wykonywalny,
 - **(1 << 1 )** zawartość sekcji można modyfikować,
@@ -163,11 +150,12 @@ timeout:	8
 Krótki opis każdej z linii:
 
 - `timeout` ilość pozostałych sekund, po których uruchomiony zostanie nasz wpis,
-- `/4programmers` etykieta opisująca nasz wpis na temat systemu operacyjnego,
+- `/4programmers` etykieta menu,
 - `protocol` w jaki sposób ma się komunikować program rozruchowy z jądrem systemu,
 - `path` ścieżka do pliku jądra systemu, `boot():/` oznacza katalog główny nośnika z którego uruchomiony został program rozruchowy
 
 Wizualizacja:
+
 ![alt text](image-11.png)
 
 Po wszystkie możliwe opcje konfiguracji pliku konfiguracyjnego odsyłam do [źródła](https://codeberg.org/Limine/Limine/src/branch/v9.x/CONFIG.md).
@@ -177,6 +165,8 @@ Po wszystkie możliwe opcje konfiguracji pliku konfiguracyjnego odsyłam do [źr
 Wykorzystamy najbardziej powszechny format dystrybucyjny jakim jest ISO. Działa wszędzie, łatwo stworzyć i świetnie nadaje się do naszych prac. Nie ma tu żadnego pliku konfiguracyjnego ;)
 
 ## Tworzenie i uruchamianie:
+
+W skrypcie zostały wykorzystane przekierowania standardowego wyjścia do **/dev/null 2>&1**. Ma to na celu niezaśmiecania zbędnymi informacjami podczas pracy. Jeśli w trakcie jakiejkolwiek czynności wystąpi błąd to zostanie wyświetlony.
 
 <sub>Plik: `make.sh`:</sub>
 ```sh
@@ -238,4 +228,4 @@ Jaki efekt będzie na nas czekał po uruchomieniu obydwu skryptów?
 
 ![alt text](image-12.png)
 
-Czarny stabilny ekran. Tak, to jest nasz system operacjyny w stanie jakim go przygotowaliśmy.
+Realny efekt końcowy – czarny ekran po uruchomieniu, czyli prawdziwy "Hello, OSDev!" w praktyce.
