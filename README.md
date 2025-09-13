@@ -1,17 +1,14 @@
-# 0x00_YwpHeKIehMBk
-For my microblog at 4programmers.net, exclusively.
-
-add #blackdev.org, #barebones, #c, #asm, #osdev, #kernel, #x86_64, #limine
-
-Witaj na moim mikroblogu poświęconemu programowaniu. Celem wpisów będzie przedstawienie Ci w jaki sposób, wykonując minimalną ilość kroków stworzyć mały i zarazem w pełni funkcjonalny system operacyjny. Każdy następny wpis będzie pojawiał się cyklicznie, gdy wskazówki mojego zegarka zrównają się ze sobą.
+Witaj na moim mikroblogu poświęconemu programowaniu. Celem wpisów będzie przedstawienie Ci w jaki sposób, wykonując minimalną ilość kroków stworzyć mały i zarazem w pełni funkcjonalny system operacyjny. Każdy kolejny wpis będzie pojawiał się cyklicznie, gdy wskazówki mojego zegarka zrównają się ze sobą.
 <sub>ekhm, jest cyfrowy...</sub>
 
-Wpisy będą oznaczane za pomocą taga **#blackdev.org**, pozwoli to na łatwe zlokalizowanie wszystkich wpisów mojego autorstwa. Nie omieszkam dodać innych, zależnie od poruszanego tematu.
+Jest to mój pierwszy akt napisania czegoś więcej niż odpowiedzi na forum. Za wszelkie niedociągnięcia, przepraszam :D
+
+Zamieszczony materiał będzie oznaczany za pomocą taga **#blackdev.org**, pozwoli to na łatwe zlokalizowanie wszystkich wpisów mojego autorstwa. Nie omieszkam dodać innych, zależnie od poruszanego tematu.
 
 Nie jestem osobą postronną w tym temacie i nie sądzę bym rzucał się z motyką na słońce. Posiadam odpowiednie zaplecze doświadczenia z tej dziedziny, co mogę udowodnić okazując moje dwa repozytoria już w jakimś stopniu działających systemów. Jedno w języku Asemblera (<a href="https://github.com/CorruptedByCPU/Cyjon/tree/eldest">Cyjon v1</a>, <a href="https://github.com/CorruptedByCPU/Cyjon/tree/old">Cyjon v2</a>) oraz drugie zapisane w czystym języku C (<a href="https://github.com/CorruptedByCPU/Foton">Foton</a>)
 <sup>*no dobra, jest trochę wstawek z języka Asemblera, bez tego się nie obejdzie*</sup>
 
-Naszymi głównymi narzędziami programistycznymi będą języki **C** i **Asembler** — każdy w swoim zakresie odpowiedzialności. Do kompilacji kodu w języku C posłuży nam **Clang** z rodziny LLVM (https://clang.llvm.org/), natomiast pliki asemblerowe przetwarzane będą przez **NASM** (https://www.nasm.us/). Natomiast za środowisko produkcyjne posłuży nam jakikolwiek system operacyjny z rodziny GNU/Linux. Można też wszystkie akcje wykonać za pomocą MS Windows i subsystemu WSL (sprawdzałem, działa).
+Naszymi głównymi narzędziami programistycznymi będą języki **C** i **Asembler** — każdy w swoim zakresie odpowiedzialności. Do kompilacji kodu w języku C posłuży nam **Clang** z rodziny LLVM (https://clang.llvm.org/), zarazem pliki asemblerowe przetwarzane będą przez **NASM** (https://www.nasm.us/). Za środowisko produkcyjne posłuży nam jakikolwiek system operacyjny z rodziny GNU/Linux. Można też wszystkie akcje wykonać za pomocą MS Windows i subsystemu WSL (sprawdzałem, działa).
 
 Ostatnia informacja gwoli ścisłości: każdy przykład zostanie przedstawiony w sposób minimalny, aby osiągnąć oczekiwany efekt. Funkcjonalność będziemy rozwijać powoli, krok po kroku, aby wszystko było dobrze zrozumiałe. Wszelkie uwagi, pytania, pomysły, domysły i spekulacje mogą zostać poddane przemyśleniom, ale niekoniecznie zaimplementowane.
 
@@ -156,7 +153,7 @@ Krótki opis każdej z linii:
 
 Wizualizacja:
 
-![alt text](image-11.png)
+![hello](https://blackdev.org/shot/4p-limine.png)
 
 Po wszystkie możliwe opcje konfiguracji pliku konfiguracyjnego odsyłam do [źródła](https://codeberg.org/Limine/Limine/src/branch/v9.x/CONFIG.md).
 
@@ -226,6 +223,6 @@ qemu-system-x86_64 -cdrom build/system.iso
 
 Jaki efekt będzie na nas czekał po uruchomieniu obydwu skryptów?
 
-![alt text](image-12.png)
+![hello](https://blackdev.org/shot/4p-hello.png)
 
 Realny efekt końcowy – czarny ekran po uruchomieniu, czyli prawdziwy "Hello, OSDev!" w praktyce.
